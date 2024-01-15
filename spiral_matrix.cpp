@@ -2,7 +2,9 @@
 #include<stdlib.h>
 using namespace std;
 const int n=6;
-int res[n][n];
+// int* res=new int*[n];
+int res[n][n]={0};
+
 struct dir{
     int x;
     int y;
@@ -34,7 +36,7 @@ int main(){
         now.add(to[idx]);
         res[now.r][now.c]=i;
     }
-    void printout(int a[n][n]);
+    void printout(int  a[n][n]);
     printout(res);
     // cout<<a[0];
 }
