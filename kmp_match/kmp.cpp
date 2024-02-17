@@ -5,6 +5,42 @@ ABAABABE
 ABAB
 0012
 */
+void match(const string & mat,int *comlen){
+    int n=mat.length(),pc=0;
+    comlen[0]=0;
+    for(int i=1;i<n;i++){
+        char v=mat[i];
+        while (pc && mat[pc]!=v){
+            pc=comlen[pc-1];
+        }
+        if (mat[pc]==v){
+            pc++;
+        }
+        comlen[i]=pc;
+    }
+}
+void kmp(const string & str ,const string & mat){
+    int n1=str.length();
+    int n2=mat.length();
+    int * comlen =new int[n2];
+    match(mat,comlen);
+    int pc=0,pos=0;
+    for(int i=0;i<n1;i++){
+        char v=str[i];
+        while(pc && mat[pc]!=v){
+            pc=mat[pc-1];
+        }
+        if (mat[pc]==v){
+            pc++;
+        }
+        if (pc==n2){   //pc-i+1 即为匹配位
+            pos=pc-i+1;  
+            pc=mat[pc-1];
+        }
+    }
+    delete [] comlen;
+}
+/*
 int match(string str,string mat,int *next){
     int p1=0,p2=0;
     int n1=str.length(),n2=mat.length();
@@ -29,7 +65,6 @@ int match(string str,string mat,int *next){
     }
     return t;
     // return -1;
-}
 void next_array(string str,int *array){
     int n=str.length();
     int pc=0,i=1;
@@ -45,13 +80,4 @@ void next_array(string str,int *array){
         }
     }
 }
-int main(){
-    string s="ABCABDAB";
-    string mat="ABCAB";
-    int arr[100];
-    next_array(mat,arr);
-    // for(int i=0;i<mat.length();i++){
-    //     cout<<arr[i]<<" ";
-    // }
-    cout<<match(s,mat,arr);
-}
+}*/
