@@ -6,6 +6,7 @@ from Plants_slot import Plant_Slot
 
 from Zombie import  Zombie
 
+from Sun import sun
 z=Zombie(2)
 
 selected_plants = [SUNFLOWER, PEE]
@@ -19,7 +20,6 @@ def update(update_lists):
         for role in update_list:
             role.update()
 
-
 def game_draw():
     draw(background, (-200, 0))
     draw(slot, (50, 0))
@@ -32,6 +32,7 @@ def game_draw():
         for zombie in raw:
             zombie.update()
     Slot.update()
+    
 
 def exit_game():
     pygame.quit()

@@ -1,6 +1,6 @@
 from Init import *
 
-path = [r"C:\python.pycharm\picture\pic\gif\gif_zombie\No{}.png".format(i) for i in range(31)]
+path = [pic(r"C:\python.pycharm\picture\pic\gif\gif_zombie\No{}.png".format(i)) for i in range(31)]
 rows = [100 * i + 80 for i in range(RAW_NUM)]
 
 def pos_block(pos_x):
@@ -13,8 +13,7 @@ class Zombie:
     def __init__(self, row):
         self.row = row
         self.img_num = 0
-        self.img_set = path
-        self.img = pic(path[self.img_num])
+        self.img = path[self.img_num]
         self.rect = self.img.get_rect()
         self.rect.center = (800, rows[row])
         self.gif_update_time = get_time()
@@ -27,7 +26,7 @@ class Zombie:
             self.img_num += 1
             self.img_num %= 31
             self.move()
-            self.img = pic(self.img_set[self.img_num])
+            self.img = path[self.img_num]
 
     def move(self):
         self.rect.centerx-=self.move_speed
