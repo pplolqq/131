@@ -30,25 +30,30 @@ class Plant_Slot:
         self.selected_plants = self.plant_slot_init(selected_plants)
         self.is_follow = False
         self.generate_time = get_time()
-
+        
+        self.is_clicked = False
+        self.follow_plant = None
     def update(self):
-        self.zombie_generate()
-        self.is_click()
 
-    def is_click(self):
-        mouse_pos = get_mouse_pos()
+        self.zombie_generate()
+        if self.is_clicked:
+            self.is_clicked = self.follow_plant.is_follow
+        else:
+            self.check_click()
+
+    def check_click(self):
         now_time = get_time()
-        for plant in self.selected_plants:
+        mouse_pos = get_mouse_pos()
+        mouse_press = pygame.mouse.get_pressed(3)
+        for plant in self.selected_plants :
             plant: Plant_Card
-            if pygame.mouse.get_pressed(3)[0] and intersect(mouse_pos,
-                                                            plant.rect) and not plant.is_cooldown and not self.is_follow:
-                plant.cooldown_start = now_time
-                plant.follow_start = now_time
-                plant.is_cooldown = True
+            if mouse_press[0] and intersect(mouse_pos,plant.rect) and not plant.is_cooldown:
+                self.is_clicked = True
+                self.follow_plant = plant
                 plant.is_follow = True
-                self.is_follow = True
-            if plant.is_follow:
-                self.is_follow = plant.follow(mouse_pos)
+                plant.follow_start = now_time
+                plant.card_image = plant.card_cd
+
 
     def zombie_generate(self):
         now_time = get_time()
@@ -67,6 +72,7 @@ class Plant_Card:
 
     def __common(self, id):
         self.card_image = pic(pic_set[id].card)
+        self.card_image1 =self.card_image
         self.card_cd = pic(pic_set[id].cd)
         self.rect = self.card_image.get_rect()
         self.rect.topleft = self.pos
@@ -84,45 +90,54 @@ class Plant_Card:
 
     def check_cooldown(self):
         if self.is_cooldown:
-            if self.is_follow:
-                self.cooldown_start = get_time()
-            self.is_cooldown = self.cooldown()
+            self.cooldown()
 
     def cooldown(self):
         dt = get_time() - self.cooldown_start
         interval = self.cool_time // self.rect.height
-        posy = self.rect.height - dt // interval
+        posy = self.rect.height - dt // interval  #
         if posy < 0:
-            return False
+            self.is_cooldown = False
+            return
         black = pygame.Surface((self.rect.width, posy))
         black.blit(self.card_cd, (0, 0))
         draw(black, self.pos)
-        return True
 
-    def follow(self, mouse_pos):
+    def check_follow(self):
+        if self.is_follow:
+            self.follow()
+        else:
+            self.card_image = self.card_image1
+    def follow(self):
+        mouse_pos = get_mouse_pos()
         self.followpos.center = mouse_pos
-        is_pos_ok = pos_to_grass_calculator(mouse_pos)
         mouse_status = pygame.mouse.get_pressed(3)
+        pos_res = pos_to_grass_calculator(mouse_pos)
+        is_pos_to_plant = pos_res[0] 
         if mouse_status[2]:
             self.is_cooldown = False
             self.is_follow = False
             return False
-
-        if is_pos_ok[0]:
-            r, c = is_pos_ok[1]
+        if  is_pos_to_plant:
+            r, c = pos_res[1]
             self.transpos.center = grass_pos[r][c]
             draw(self.trans_img, self.transpos.topleft)
-            draw(self.follow_img, self.followpos.topleft)
-            if get_time() - self.follow_start >= 100:
-                if mouse_status[0]:
+            now_time = get_time()
+            if now_time - self.follow_start >= 100 and mouse_status[0] : 
+                    self.cooldown_start = now_time
+                    self.is_cooldown = True
                     self.is_follow = False
-                    plants_pos[r][c] = self.generate(is_pos_ok[1])
+                    plants_pos[r][c] = self.generate((r,c))
                     return False
+            
         draw(self.follow_img, self.followpos.topleft)
         return True
+   
 
     def update(self):
         draw(self.card_image, self.rect.topleft)
+
+        self.check_follow()
         self.check_cooldown()
 
     def generate(self, pos_dot):

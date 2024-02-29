@@ -27,11 +27,20 @@ class Kr:
         self.dowm = down
         self.shoot = shoot
 
+
+
 class Weapon:
+    """
+attrs_of_weapon:
+    attack_v
+    back_force
+    repel_force
+    bullet_num
+    shoot_style
+"""
     def __init__(self,weapon_img_l,weapon_img_r):
         self.weapon_img_l = weapon_img_l
         self.weapon_img_r = weapon_img_r
-
     def shoot(self,dir,pos,num):
         bullets.append(Bullet(dir,pos,num))
     def update(self,dir,pos):
@@ -45,20 +54,22 @@ class Weapon:
 bullets = []
 bullet_img = pic(r"game_shoot_pvp/pic/bullet.png")
 class Bullet:
-    def __init__(self,dir,pos,num,img=bullet_img) -> None:
-        self.img = img
+    def __init__(self,dir,pos,num,attrs = None) -> None:
 
         self.num = num
+
+        self.v = 30*dir
+   
+        self.img = bullet_img
 
         self.rect =self.img.get_rect()
     
         self.rect.center = pos
 
         self.rect.centery +=10
-        if dir == -1:
-            self.rect.x-=10
 
-        self.v = 30*dir
+        if dir == -1:
+            self.rect.x-=10  #调整位置
 
         self.dir = dir
     def is_beat(self):
@@ -66,14 +77,19 @@ class Bullet:
             if role.rect.left<=self.rect.centerx<=role.rect.right  and role.rect.top<=self.rect.centery <= role.rect.bottom and self.num != role.num:
                 role.repelled(self.dir)
                 role.is_repelled= True
-                bullets.remove(self)
-                return
+                return True
+        
+        return False
+    def is_out(self):
+        return self.rect.centerx<=0 or self.rect.centerx>=SCREEN_LENGTH
+    
+    def disposal(self):
+        bullets.remove(self)
     def update(self):
-        self.is_beat()
         self.rect.x+=self.v
         draw(self.img,self.rect.topleft)
-        if self.rect.centerx<=0 or self.rect.centerx>=SCREEN_LENGTH:
-            bullets.remove(self)
+        if self.is_beat() or self.is_out():
+            self.disposal()
 
 def point_add(p, q):
     return (p[0] + q[0], p[1] + q[1])
@@ -130,6 +146,7 @@ class Blood_slot:
         pygame.draw.rect(screen,self.border_color,pygame.Rect(self.pos_blood_slot,self.l_w_blood_slot),5,20)
         draw(self.text,(self.pos_role[0]+60,self.pos_role[1]+5))
 
+common_weapon = Weapon(pic(r"game_shoot_pvp\pic\gun_l.png"),pic(r"game_shoot_pvp\pic\gun.png"))
 class Role:
     def __init__(self,img,kr:Kr,bs,num) -> None:
         
@@ -158,7 +175,7 @@ class Role:
         self.xmove= 10      #按一次移动的移动量
         self.press = None
 
-        self.weapon =  Weapon(pic(r"game_shoot_pvp\pic\gun_l.png"),pic(r"game_shoot_pvp\pic\gun.png"))
+        self.weapon = common_weapon 
 
         self.time = 0
         self.shoot_time=0
@@ -182,7 +199,7 @@ class Role:
         if self.vx*self.force_x > 0:
             self.vx -= self.force_x * 2
             self.rect.x+=self.vx
-
+        
     def move(self):
 
         press=pygame.key.get_pressed()
@@ -194,15 +211,13 @@ class Role:
         if press[self.kr.right]:
             self.dir=1
             self.rect.x+=self.dir*self.xmove
-
         if press[self.kr.jump] and self.jump_times and not self.press_key_k:
-            self.press_key_k=True
-            self.jump_times-=1
-            self.is_stand=False
-            self.v=-12
+                self.press_key_k=True
+                self.jump_times-=1
+                self.is_stand=False
+                self.v=-12
         if not press[self.kr.jump] and self.press_key_k:
-            self.press_key_k=False
-
+                self.press_key_k=False
         if press[self.kr.dowm]:
             self.is_stand=False
             self.rect.y+=1
@@ -266,7 +281,7 @@ def Role_img(color):
 
 
 Kr_player1 = Kr(K_w,K_a,K_d,K_s,K_j)
-Kr_player2 = Kr(K_UP,K_LEFT,K_RIGHT,K_DOWN,K_KP_PLUS)
+Kr_player2 = Kr(K_UP,K_LEFT,K_RIGHT,K_DOWN,K_KP_1)
 
 orange = (255,125,40)
 green = (180,230,30)
@@ -315,6 +330,7 @@ def main():
         for bullet in bullets:
             bullet:Bullet
             bullet.update()
+        
         text_draw()
         pygame.display.flip()
         pygame.time.Clock().tick(60)
