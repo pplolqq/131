@@ -50,10 +50,11 @@ class Plant_Slot:
             if mouse_press[0] and intersect(mouse_pos,plant.rect) and not plant.is_cooldown:
                 self.is_clicked = True
                 self.follow_plant = plant
+            
                 plant.is_follow = True
                 plant.follow_start = now_time
-                plant.card_image = plant.card_cd
-
+                plant.card_image = plant.card_cd    
+                
 
     def zombie_generate(self):
         now_time = get_time()
