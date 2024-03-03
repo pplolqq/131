@@ -17,13 +17,16 @@ little_blue = (0,200,255)
 
 def text(body,v,color =little_blue):
     return text_show.render(str(body)+str(v),1,color)
-def text_draw():
-    draw(text("role1_pos: ",role_2.rect.center),(0,0))
-    draw(text("role1_v: ",role_2.vx),(0,40))
-    draw(text("role1_force: ",role_2.force_x),(0,80))
+def text_draw(role = role_1):
+    draw(text("role1_pos: ",role.rect.center),(0,0))
+    draw(text("role1_v: ",role.vx),(0,40))
+    draw(text("role1_force: ",role.force_x),(0,80))
 
-time = get_time()
-idx = 0
+work_pos = [(100+x*40,0) for x in range(3)]
+
+def draw_line(startpos,endpos,wide=5,color=green):
+    pygame.draw.line(screen,color,startpos,endpos,wide)
+
 def main():
     global idx,time
     running =True
@@ -40,7 +43,7 @@ def main():
         draw(map1,(150,150))
         # for ground in ground_poses:
             # pygame.draw.line(screen,(255,0,0),(ground[0],ground[2]),(ground[1],ground[2]),5)
-
+        
         for role in role_group:
             role:Role
             role.update()

@@ -26,18 +26,9 @@ player_total = 2
 
 ground_poses=[[165, 345, 200], [440, 580, 180], [680, 850, 175], [265, 740, 250], [165, 326, 350], [370, 600, 350], [680, 870, 330],[780,885,235]]
 
-pi = 3.1415926
-rc_v = [(math.cos(pi/18 * i ),math.sin(pi/18 * i )) for i in range(-4,4)]
-rotato_pos_l = [(-int(70*x),int(70*y)) for x,y in rc_v]
-rotato_pos_r = [(-x,y) for x,y in rotato_pos_l]
-
-rotato_pos = {1:rotato_pos_r,-1:rotato_pos_l}
-rotato_v_l  = [(int(math.tan(pi/18*i)*1000+0.5)) for i in range(-4,4)]
-rotato_v_r = [(int(math.tan(pi/18*i)*1000+0.5)) for i in range(3,-5,-1)]
-rotato_v = {1:rotato_v_r, -1:rotato_v_l}
 
 # print(rotato_pos1)
-def slope_calculate(p1,p2):
+def slope_calculate(p1: tuple[int,int],p2: tuple[int,int]):
     dx = p2[0] - p1[0]
     dy = p2[1] - p1[1]
     if dx :
@@ -58,3 +49,7 @@ PLAYER_MOVE_SPEED = 10
 JUMP_SPEED = 12
 
 BULLET_SPEED = 30
+
+
+ROLE_LENGTH = 50
+ROLE_WIDTH = 50

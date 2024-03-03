@@ -66,7 +66,6 @@ class Role:
         
         if press[self.kr.shoot] and self.time - self.shoot_time >= 180:
             self.vx -= self.weapon.back_force * self.dir
-            self.force_x = self.dir
             self.shoot_time = pygame.time.get_ticks()
             self.weapon.attack()
 
@@ -104,59 +103,62 @@ class Role:
                 return
         self.g=self.gravity
     
-    #died 重写为状态机函数 ---> 判断 -- 执行
-        
-#重写准备
-        
-    def died(self):
+    def status_renew(self):
+        self.rect.center = (random.randint(200,800),-100)   #随机的重生位置
+        self.v,self.vx = 0, 0
+
+    def check_died(self):
         if (self.rect.top>=SCREEN_WIDTH  or self.blood_slot.length <=0) and not self.is_died:
             self.die_time = pygame.time.get_ticks()
             self.is_died = True
             self.rect.y=1000
-
-
         if self.is_died:
-            self.blood_slot.length = 0
-        if self.is_died and self.time - self.die_time >= 1000:
-
+            self.die()
+            
+    def die(self):
+        self.blood_slot.length = 0
+        if self.time - self.die_time >= 1000:
             self.blood_slot.text_update()
-            self.rect.center = (random.randint(200,800),-100)   #随机的重生位置
-            self.v = 0
+            self.status_renew()
             self.is_died =False
-    
+
     def check_repelled(self):
         for bullet in bullets:
             bullet : Bullet
-            if bullet.is_pounding(self.rect,self.num) and self.vx == 0:
-                self.repelled(bullet.dir,bullet.impact_force,bullet.damage)
+            if self.num == bullet.num:
+                continue
+            if bullet.is_pounding(self.rect) and self.vx == 0:
+                
+                self.repelled(bullet.pound(),bullet.damage)
                 bullet.disposal()
                 # print("play_"+str(self.num)+"受到了"+str())
 
-    def repelled(self,bullet_dir,impact_force,damage):
-        self.vx += bullet_dir*impact_force
-        self.force_x = -bullet_dir
+    def repelled(self,bullet_force:tuple[int,int],damage):
+        self.vx,self.v = point_add((self.vx,self.v),bullet_force)
         self.blood_slot.length -= damage
     
     #负责人物位置相关常数的更新
     def status_update(self):
-        
         self.v+=self.g
         self.rect.y+=self.v
 
-        if self.vx*self.force_x < 0:
-            self.vx += self.force_x * self.friction_constant
-            self.rect.x += self.vx
+        if self.vx != 0 :
+            self.force_x = 1 if self.vx < 0 else -1
+            if self.vx*self.force_x < 0:
+                # self.vx += self.force_x * self.friction_constant
+                self.vx += self.force_x 
         else:
             self.force_x = 0
-            self.vx = 0
+        self.rect.x += self.vx
+            
     def update(self):
         self.time = pygame.time.get_ticks()
 
         self.stand_judge()
         self.move()
         self.shoot() 
-        self.died()
         self.check_repelled()
+        self.check_died()
         self.status_update()
 
         draw(self.role,self.rect.topleft)
