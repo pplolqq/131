@@ -30,6 +30,7 @@ def draw_line(startpos,endpos,wide=5,color=green):
 def main():
     global idx,time
     running =True
+    
     while running:
         press=pygame.key.get_pressed()
         for even in pygame.event.get():
@@ -50,6 +51,7 @@ def main():
         for bullet in bullets:
             bullet:Bullet
             bullet.update()
+        
         text_draw()
         pygame.display.flip()
         pygame.time.Clock().tick(60)

@@ -41,6 +41,9 @@ def slope_calculate(p1: tuple[int,int],p2: tuple[int,int]):
 orange = (255,125,40)
 green = (180,230,30)
 white = (255,255,255)
+black = (0,0,0)
+red =  (255,0,0)
+
 
 color_selected = [green,orange]
 
@@ -53,3 +56,10 @@ BULLET_SPEED = 30
 
 ROLE_LENGTH = 50
 ROLE_WIDTH = 50
+
+"""
+抛物线方程
+y = -1*(400-x) * x // 1000
+
+
+"""

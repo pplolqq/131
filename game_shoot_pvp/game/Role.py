@@ -60,14 +60,7 @@ class Role:
         self.text_show = pygame.font.Font(None,50)
         self.text_content = ""
         self.text = self.text_show.render(self.text_content,1,green)
-        
-    def shoot(self):
-        press = pygame.key.get_pressed()
-        
-        if press[self.kr.shoot] and self.time - self.shoot_time >= 180:
-            self.vx -= self.weapon.back_force * self.dir
-            self.shoot_time = pygame.time.get_ticks()
-            self.weapon.attack()
+    
 
             
     def move(self):
@@ -122,12 +115,23 @@ class Role:
             self.status_renew()
             self.is_died =False
 
+
+    #待重写，抽象到weapon类中
+        
+    def shoot(self):
+        # self.weapon.shoot_check(press[self.kr.shoot])
+        if self.press[self.kr.shoot] and self.time - self.shoot_time >= 180:
+            self.vx -= self.weapon.back_force * self.dir
+            self.shoot_time = pygame.time.get_ticks()
+            self.weapon.attack()
+
     def check_repelled(self):
         for bullet in bullets:
             bullet : Bullet
             if self.num == bullet.num:
                 continue
-            if bullet.is_pounding(self.rect) and self.vx == 0:
+            # if bullet.is_pounding(self.rect) and self.vx == 0:
+            if bullet.is_pounding(self.rect) :
                 
                 self.repelled(bullet.pound(),bullet.damage)
                 bullet.disposal()
@@ -145,7 +149,6 @@ class Role:
         if self.vx != 0 :
             self.force_x = 1 if self.vx < 0 else -1
             if self.vx*self.force_x < 0:
-                # self.vx += self.force_x * self.friction_constant
                 self.vx += self.force_x 
         else:
             self.force_x = 0
@@ -153,10 +156,11 @@ class Role:
             
     def update(self):
         self.time = pygame.time.get_ticks()
+        self.press = pygame.key.get_pressed()
 
         self.stand_judge()
         self.move()
-        self.shoot() 
+        # self.shoot()
         self.check_repelled()
         self.check_died()
         self.status_update()
@@ -168,4 +172,6 @@ class Role:
     def weapon_update(self):
         self.weapon.dir = self.dir
         self.weapon.pos = self.rect.center
+        self.weapon.time = self.time
+        self.weapon.is_shoot = self.press[self.kr.shoot]
         self.weapon.update()

@@ -14,34 +14,48 @@ attrs_of_weapon:
         # self.weapon_im
         # self.weapon_img_r = pic(r"game_shoot_pvp\pic\gun_l.png"),pic(r"game_shoot_pvp\pic\gun.png")
 
-        self.back_force: int
+        self.is_shoot = False
+        self.shoot_time = 0
+        self.shoot_interval = 180
         #common_args
-        self.idx = 0
+        self.idx = 0   #类内计时
+        self.back_force: int
         self.dir : int = 1 
         self.pos : tuple[int, int]
         self.time : int
         self.num : int
-
-    def attack(self):
+    def press_judge(self):
+        if self.is_shoot and self.time - self.shoot_time >= self.shoot_interval:
+            self.shoot_time = self.time
+            return True
+        return False
+    def shoot_check(self):
         pass
     def update(self):
         pass
-
+#region commongun
 class Common_Gun(Weapon):
     def __init__(self):
         super().__init__() 
         self.img_list = {1:pic(r"game_shoot_pvp\pic\gun_R.png"),-1:pic(r"game_shoot_pvp\pic\gun_L.png")}
         self.back_force = 2
         self.rect = self.img_list[self.dir].get_rect()
-    def attack(self):
-        bullets.append(Bullet_common(self.dir,self.pos,self.num))
+        self.shoot_interval = 240
+
+    def shoot_check(self):
+        if self.press_judge():
+            bullets.append(Bullet_common(self.dir,self.pos,self.num))
 
     def update(self):
+        self.shoot_check()
         self.img = self.img_list[self.dir]
         self.rect.center = self.pos
         draw_pos = point_add(self.rect.topleft,(0,10))
         draw(self.img,draw_pos)
+#endregion
 
+
+#region sword
 pic_staves_l = [pic(fr"game_shoot_pvp\z_temp\L\{i}.png") for i in range(1,9)]
 pic_staves_r = [pic(fr"game_shoot_pvp\z_temp\R\{i}.png") for i in range(1,9)]    
 pic_staves = {1:pic_staves_r,-1:pic_staves_l}
@@ -53,27 +67,63 @@ class Sword(Weapon):
         self.rect = self.img.get_rect()
         self.back_force = 0
         self.is_attack = False
-    def attack(self):
-        self.is_attack = True
-        self.time = get_time()
+        self.shoot_time = 0
+        self.shoot_interval = 500
+    def shoot_check(self):
+        if self.press_judge():
+            self.is_attack = True
+        if self.is_attack :
+            self.slash()
     def slash(self):
-        # if get_time() - self.time >= 2:
-            self.idx += 1
-            if self.idx == 1:
-                bullets.append(Stove_ball(self.dir,self.pos,self.num))
-            if self.idx == 8:
-                self.idx = 0
-                self.is_attack = False
-            self.time = get_time()
-        # stave_rear_pos = point_add(self.rect.center,rotato_pos[self.dir][self.idx])
-        # pygame.draw.line(screen,green,self.rect.center,stave_rear_pos,5)
-
+        self.idx += 1
+        if self.idx == 8:
+            self.idx = 0
+            self.is_attack = False
+            bullets.append(Stove_ball(self.dir,self.pos,self.num))
     def update(self):
+        self.shoot_check()
         self.img = pic_staves[self.dir][self.idx]
         self.rect.center = point_add(self.pos,(0,10))
-        if self.is_attack:
-            self.slash()
         draw(self.img,self.rect.topleft)
+
     def generate(self):
         return Sword()
-weapon_select = [Sword(),Common_Gun()]
+#endregion
+class Charge_Gun(Common_Gun):
+    def __init__(self):
+        super().__init__()
+        self.charge_total_length = 40
+        self.charge_x = 0
+        self.ok_shoot = False
+
+    def shoot_check(self):
+        if self.is_shoot:
+            self.charge()
+        else:
+            self.idx = 0 
+        if self.ok_shoot and not self.is_shoot:
+            self.ok_shoot = False
+            bullets.append(Bullet_sniper(self.dir,self.pos,self.num))
+            self.idx = 0
+    def charge(self):
+        self.idx += 2
+        x = self.pos[0] - self.dir * (self.charge_total_length//2)
+        y = self.pos[1] - ROLE_LENGTH//2
+        if self.ok_shoot:
+            self.idx = self.charge_total_length
+        pygame.draw.line(screen,red,(x,y),(x+self.dir*self.idx,y),5)
+        if self.idx == self.charge_total_length:
+            x = self.pos[0] + self.dir * (ROLE_WIDTH//2)
+            y = self.pos[1]
+            pygame.draw.line(screen,white,(x,y),(x+self.dir*1000,y),2)
+            self.ok_shoot = True
+
+weapons = [Sword,Charge_Gun,Common_Gun]
+
+weapon_select_id = [1,0]
+
+
+weapon_select = []
+for id in weapon_select_id:
+    weapon = weapons[id]
+    weapon_select.append(weapon())

@@ -63,6 +63,14 @@ class Bullet_common(Bullet):
         if self.is_out():
             self.disposal()
 
+class Bullet_sniper(Bullet_common):
+    def __init__(self, dir, pos, num) -> None:
+        super().__init__(dir, pos, num)
+        self.impact_force = 20
+        self.damage = 50
+        self.speed *= 3
+
+
 class Stove_ball(Bullet):
     def __init__(self, dir, pos, num) -> None:
         super().__init__(dir, pos, num)
@@ -121,7 +129,8 @@ class BUllet_sword_trace(Bullet):
         self.idx = -1
         self.role_x = pos[0]
         self.role_center = pos
-
+    def pound(self) -> tuple[int, int]:
+        return (self.dir*self.impact_force,0)
     def is_pounding(self, rect:pygame.Rect):
         rear_pos_x = rotato_pos[self.dir][self.idx][0] + self.role_x
         rear_slope = rotato_v[self.dir][self.idx]    
