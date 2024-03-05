@@ -26,9 +26,9 @@ work_pos = [(100+x*40,0) for x in range(3)]
 
 def draw_line(startpos,endpos,wide=5,color=green):
     pygame.draw.line(screen,color,startpos,endpos,wide)
-
 def main():
     running =True
+    rect = pygame.Rect(0,0,20,20)
     
     while running:
         press=pygame.key.get_pressed()
@@ -50,7 +50,6 @@ def main():
         for bullet in bullets:
             bullet:Bullet
             bullet.update()
-        
         text_draw()
         pygame.display.flip()
         pygame.time.Clock().tick(60)

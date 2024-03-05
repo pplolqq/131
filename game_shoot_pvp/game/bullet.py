@@ -53,6 +53,10 @@ class Bullet_common(Bullet):
         left , right = rect.left,rect.right
         top , bottom = rect.top,rect.bottom
         x , y = self.rect.center
+        x_e = self.v + x 
+        if ((x_e >=right and x <left) or (x_e >=left and x<right)) and top <= y <= bottom:
+            return True
+
         if left <= x <= right and top <= y <= bottom:
             return True
         return False
@@ -60,6 +64,7 @@ class Bullet_common(Bullet):
         return (self.dir*self.impact_force,0)
     def update(self):
         self.move()
+        print(self.pos)
         if self.is_out():
             self.disposal()
 
@@ -68,7 +73,8 @@ class Bullet_sniper(Bullet_common):
         super().__init__(dir, pos, num)
         self.impact_force = 20
         self.damage = 50
-        self.speed *= 3
+        self.v *= 2
+
 
 
 class Stove_ball(Bullet):

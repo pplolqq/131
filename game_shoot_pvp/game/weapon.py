@@ -25,8 +25,9 @@ attrs_of_weapon:
         self.pos : tuple[int, int]
         self.time : int
         self.num : int
-    def shoot(self,Bullet_type:Bullet):
-        bullets.append(Bullet_type(self.dir,self.pos,self.num))
+        self.bullet_type: Bullet
+    def shoot(self,):
+        bullets.append(self.bullet_type(self.dir,self.pos,self.num))
 
 
     def press_judge(self):
@@ -47,10 +48,11 @@ class Common_Gun(Weapon):
         self.back_force = 2
         self.rect = self.img_list[self.dir].get_rect()
         self.shoot_interval = 240
+        self.bullet_type = Bullet_common
     def shoot_check(self):
         if self.press_judge():
             self.is_shoot = True
-            self.shoot(Bullet_common)
+            self.shoot()
     def update(self):
         self.shoot_check()
         self.img = self.img_list[self.dir]
@@ -74,6 +76,7 @@ class Sword(Weapon):
         self.is_attack = False
         self.shoot_time = 0
         self.shoot_interval = 500
+        self.bullet_type = Stove_ball
     def shoot_check(self):
         if self.press_judge():
             self.is_attack = True
@@ -87,7 +90,7 @@ class Sword(Weapon):
             self.idx = 0
             self.is_shoot = True
             self.is_attack = False
-            self.shoot(Stove_ball)
+            self.shoot()
     def update(self):
         self.shoot_check()
         self.img = pic_staves[self.dir][self.idx]
@@ -99,19 +102,19 @@ class Charge_Gun(Common_Gun):
     def __init__(self):
         super().__init__()
         self.charge_total_length = 40
-        self.charge_x = 0
-        self.is_charge = False
         self.is_full = False
         self.back_force = 5
-
+        self.bullet_type = Bullet_sniper
+        
     def shoot_check(self):
         if self.is_press:
-            self.is_charge = True
+            self.charge()
         else:
             self.idx = 0
-        if self.is_charge :
-            self.charge()
-
+        if self.is_full and not self.is_press:
+                self.is_shoot = True
+                self.is_full = False
+                self.shoot()
     def charge(self):
         x = self.pos[0] - self.dir * (self.charge_total_length//2)
         y = self.pos[1] - ROLE_LENGTH//2
@@ -125,12 +128,7 @@ class Charge_Gun(Common_Gun):
             self.is_full = True
         self.idx += 2
     
-        if self.is_full and not self.is_press:
-            self.is_shoot = True
-            self.is_charge = False
-            self.is_full = False
-            self.idx = 0
-            self.shoot(Bullet_sniper)
+       
             
 weapons = [Sword,Charge_Gun,Common_Gun]
 
