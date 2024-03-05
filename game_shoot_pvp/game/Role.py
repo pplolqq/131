@@ -61,38 +61,48 @@ class Role:
         self.text_content = ""
         self.text = self.text_show.render(self.text_content,1,green)
     
+    def left_move(self):
+        self.dir=-1
+        self.rect.x+=self.dir*self.xmove
 
-            
-    def move(self):
+    def right_move(self):
+        self.dir=1
+        self.rect.x+=self.dir*self.xmove
+   
+    def jump(self):
+        self.is_stand=False
+        self.v = -self.jump_speed
 
-        press=pygame.key.get_pressed()
-        
-        if press[self.kr.left]:
-            self.dir=-1
-            self.rect.x+=self.dir*self.xmove
-        
-        if press[self.kr.right]:
-            self.dir=1
-            self.rect.x+=self.dir*self.xmove
-        if press[self.kr.jump] and self.jump_times and not self.press_key_k:
+
+
+    def check_jump(self):
+        if self.press[self.kr.jump] and self.jump_times and not self.press_key_k:
                 self.press_key_k =True
                 self.jump_times -= 1
-                self.is_stand=False
-                self.v = -self.jump_speed
-        if not press[self.kr.jump] and self.press_key_k:
+                self.jump()
+        if not self.press[self.kr.jump] and self.press_key_k:
                 self.press_key_k=False
-        if press[self.kr.dowm]:
+
+        if self.press[self.kr.dowm]:
             self.is_stand=False
             self.rect.y+=1
 
-    
-    def stand_judge(self):
+    def check_move(self):
+        if self.press[self.kr.left]:
+            self.left_move()
+        if self.press[self.kr.right]:
+            self.right_move()
+        
+
+    def stand(self):
+        self.jump_times=self.jump_times_total
+        self.g=0
+        self.v=0
+    def check_stand(self):
         for ground in ground_poses:
             if ground[0] <=self.rect.centerx <=ground[1] and self.v>=0 and  self.rect.bottom<=ground[2] and self.rect.bottom+self.v+self.g>=ground[2]:
                 self.rect.bottom=ground[2] 
-                self.jump_times=self.jump_times_total
-                self.g=0
-                self.v=0
+                self.stand()
                 return
         self.g=self.gravity
     
@@ -116,27 +126,24 @@ class Role:
             self.is_died =False
 
 
-    #待重写，抽象到weapon类中
+    def shoot_back_impulse(self):
+        self.vx -= self.dir *self.weapon.back_force
         
-    def shoot(self):
-        # self.weapon.shoot_check(press[self.kr.shoot])
-        if self.press[self.kr.shoot] and self.time - self.shoot_time >= 180:
-            self.vx -= self.weapon.back_force * self.dir
-            self.shoot_time = pygame.time.get_ticks()
-            self.weapon.attack()
+    def check_shoot(self):
+        if self.weapon.is_shoot:
+            self.shoot_back_impulse()
+            self.weapon.is_shoot = False
 
     def check_repelled(self):
         for bullet in bullets:
             bullet : Bullet
             if self.num == bullet.num:
                 continue
-            # if bullet.is_pounding(self.rect) and self.vx == 0:
             if bullet.is_pounding(self.rect) :
-                
                 self.repelled(bullet.pound(),bullet.damage)
                 bullet.disposal()
                 # print("play_"+str(self.num)+"受到了"+str())
-
+ 
     def repelled(self,bullet_force:tuple[int,int],damage):
         self.vx,self.v = point_add((self.vx,self.v),bullet_force)
         self.blood_slot.length -= damage
@@ -158,9 +165,10 @@ class Role:
         self.time = pygame.time.get_ticks()
         self.press = pygame.key.get_pressed()
 
-        self.stand_judge()
-        self.move()
-        # self.shoot()
+        self.check_stand()
+        self.check_move()
+        self.check_jump()
+        self.check_shoot()
         self.check_repelled()
         self.check_died()
         self.status_update()
@@ -173,5 +181,5 @@ class Role:
         self.weapon.dir = self.dir
         self.weapon.pos = self.rect.center
         self.weapon.time = self.time
-        self.weapon.is_shoot = self.press[self.kr.shoot]
+        self.weapon.is_press = self.press[self.kr.shoot]
         self.weapon.update()

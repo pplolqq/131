@@ -1,3 +1,4 @@
+from bullet import Bullet
 from init import *
 from bullet import *
 
@@ -13,8 +14,8 @@ attrs_of_weapon:
     def __init__(self):
         # self.weapon_im
         # self.weapon_img_r = pic(r"game_shoot_pvp\pic\gun_l.png"),pic(r"game_shoot_pvp\pic\gun.png")
-
         self.is_shoot = False
+        self.is_press = False #role's shoot key
         self.shoot_time = 0
         self.shoot_interval = 180
         #common_args
@@ -24,11 +25,16 @@ attrs_of_weapon:
         self.pos : tuple[int, int]
         self.time : int
         self.num : int
+    def shoot(self,Bullet_type:Bullet):
+        bullets.append(Bullet_type(self.dir,self.pos,self.num))
+
+
     def press_judge(self):
-        if self.is_shoot and self.time - self.shoot_time >= self.shoot_interval:
+        if self.is_press and self.time - self.shoot_time >= self.shoot_interval:
             self.shoot_time = self.time
             return True
         return False
+    
     def shoot_check(self):
         pass
     def update(self):
@@ -41,11 +47,10 @@ class Common_Gun(Weapon):
         self.back_force = 2
         self.rect = self.img_list[self.dir].get_rect()
         self.shoot_interval = 240
-
     def shoot_check(self):
         if self.press_judge():
-            bullets.append(Bullet_common(self.dir,self.pos,self.num))
-
+            self.is_shoot = True
+            self.shoot(Bullet_common)
     def update(self):
         self.shoot_check()
         self.img = self.img_list[self.dir]
@@ -72,55 +77,64 @@ class Sword(Weapon):
     def shoot_check(self):
         if self.press_judge():
             self.is_attack = True
+
         if self.is_attack :
             self.slash()
+
     def slash(self):
         self.idx += 1
         if self.idx == 8:
             self.idx = 0
+            self.is_shoot = True
             self.is_attack = False
-            bullets.append(Stove_ball(self.dir,self.pos,self.num))
+            self.shoot(Stove_ball)
     def update(self):
         self.shoot_check()
         self.img = pic_staves[self.dir][self.idx]
         self.rect.center = point_add(self.pos,(0,10))
         draw(self.img,self.rect.topleft)
 
-    def generate(self):
-        return Sword()
 #endregion
 class Charge_Gun(Common_Gun):
     def __init__(self):
         super().__init__()
         self.charge_total_length = 40
         self.charge_x = 0
-        self.ok_shoot = False
+        self.is_charge = False
+        self.is_full = False
+        self.back_force = 5
 
     def shoot_check(self):
-        if self.is_shoot:
-            self.charge()
+        if self.is_press:
+            self.is_charge = True
         else:
-            self.idx = 0 
-        if self.ok_shoot and not self.is_shoot:
-            self.ok_shoot = False
-            bullets.append(Bullet_sniper(self.dir,self.pos,self.num))
             self.idx = 0
+        if self.is_charge :
+            self.charge()
+
     def charge(self):
-        self.idx += 2
         x = self.pos[0] - self.dir * (self.charge_total_length//2)
         y = self.pos[1] - ROLE_LENGTH//2
-        if self.ok_shoot:
+        if self.idx:
+            pygame.draw.line(screen,red,(x,y),(x+self.dir*self.idx,y),5)
+        if self.idx >= self.charge_total_length:
             self.idx = self.charge_total_length
-        pygame.draw.line(screen,red,(x,y),(x+self.dir*self.idx,y),5)
-        if self.idx == self.charge_total_length:
             x = self.pos[0] + self.dir * (ROLE_WIDTH//2)
             y = self.pos[1]
             pygame.draw.line(screen,white,(x,y),(x+self.dir*1000,y),2)
-            self.ok_shoot = True
-
+            self.is_full = True
+        self.idx += 2
+    
+        if self.is_full and not self.is_press:
+            self.is_shoot = True
+            self.is_charge = False
+            self.is_full = False
+            self.idx = 0
+            self.shoot(Bullet_sniper)
+            
 weapons = [Sword,Charge_Gun,Common_Gun]
 
-weapon_select_id = [1,0]
+weapon_select_id = [1,2]
 
 
 weapon_select = []

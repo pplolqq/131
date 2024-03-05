@@ -37,7 +37,7 @@ class Bullet_common(Bullet):
         self.rect =self.img.get_rect()
         self.rect.center = pos
         self.rect.centery +=10
-        self.impact_force = 4
+        self.impact_force = 10
         self.damage =5
         self.speed = BULLET_SPEED
         self.v = self.speed * dir

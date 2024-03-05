@@ -63,3 +63,14 @@ y = -1*(400-x) * x // 1000
 
 
 """
+
+
+"""
+键盘读取
+kr_select = []
+        for idx,bool in enumerate(pygame.key.get_pressed()):
+            if bool :
+                kr_select.append(idx) if idx not in kr_select else ""
+                break
+
+"""

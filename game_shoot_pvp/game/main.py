@@ -28,7 +28,6 @@ def draw_line(startpos,endpos,wide=5,color=green):
     pygame.draw.line(screen,color,startpos,endpos,wide)
 
 def main():
-    global idx,time
     running =True
     
     while running:
@@ -57,3 +56,4 @@ def main():
         pygame.time.Clock().tick(60)
 if __name__ == "__main__":
     main()
+    
