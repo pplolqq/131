@@ -47,7 +47,7 @@ class Bullet_common(Bullet):
     def move(self):
         self.rect.x+=self.v
         self.pos = self.rect.center
-        draw(self.img,self.rect.topleft)
+        background.blit(self.img,self.rect.topleft)
 
     def is_pounding(self, rect : pygame.Rect):
         left , right = rect.left,rect.right
@@ -64,9 +64,9 @@ class Bullet_common(Bullet):
         return (self.dir*self.impact_force,0)
     def update(self):
         self.move()
-        print(self.pos)
         if self.is_out():
             self.disposal()
+        draw(self.img,self.rect.topleft)
 
 class Bullet_sniper(Bullet_common):
     def __init__(self, dir, pos, num) -> None:

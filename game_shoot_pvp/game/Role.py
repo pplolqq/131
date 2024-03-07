@@ -2,11 +2,18 @@ from init import *
 from weapon import Weapon,weapon_select
 from bullet import Bullet
 from blood_slot import Blood_slot
+random_revive_left = 200 
+random_revive_right = 800
+pos_y = -100 
+
+die_height = 1000 
+die_wait_height = SCREEN_WIDTH 
+def random_pos():
+    return (random.randint(random_revive_left,random_revive_right),pos_y)
 
 #键盘映射 keyboard_reflection
 class Kr:
     def __init__(self,jump,left,right,down,shoot) -> None:
-        pass
         self.jump = jump
         self.left = left
         self.right = right
@@ -21,7 +28,7 @@ class Role:
         self.role : pygame.Surface = img
         
         self.rect = self.role.get_rect()
-        self.rect.center = (random.randint(200,800),0)
+        self.rect.center = random_pos()
         
         self.blood_slot : Blood_slot = Blood_slot(color_selected[num],(1000//(2*player_total+1)*(2*num+1),400))
         
@@ -48,6 +55,7 @@ class Role:
         self.move_speed = PLAYER_MOVE_SPEED
         self.xmove= self.move_speed      #按一次移动的移动量
         self.press = None
+        self.ismove = False
 
 
         self.time = 0
@@ -61,14 +69,9 @@ class Role:
         self.text_content = ""
         self.text = self.text_show.render(self.text_content,1,green)
     
-    def left_move(self):
-        self.dir=-1
-        self.rect.x+=self.dir*self.xmove
+    def move(self):
+        self.rect.x +=self.dir*self.xmove
 
-    def right_move(self):
-        self.dir=1
-        self.rect.x+=self.dir*self.xmove
-   
     def jump(self):
         self.is_stand=False
         self.v = -self.jump_speed
@@ -87,34 +90,45 @@ class Role:
             self.is_stand=False
             self.rect.y+=1
 
+
     def check_move(self):
         if self.press[self.kr.left]:
-            self.left_move()
-        if self.press[self.kr.right]:
-            self.right_move()
-        
-
+            self.dir = -1
+            self.ismove = True
+        elif self.press[self.kr.right]:
+            self.ismove = True
+            self.dir = 1
+        if self.ismove:
+            self.move()
+            self.ismove = False
+    
     def stand(self):
         self.jump_times=self.jump_times_total
         self.g=0
         self.v=0
+
     def check_stand(self):
         for ground in ground_poses:
-            if ground[0] <=self.rect.centerx <=ground[1] and self.v>=0 and  self.rect.bottom<=ground[2] and self.rect.bottom+self.v+self.g>=ground[2]:
-                self.rect.bottom=ground[2] 
+            ground:pygame.Rect
+            left,right,bottom = ground.left,ground.right,ground.bottom
+            x,y = self.rect.centerx,self.rect.bottom
+            if left <= x <= right and self.v >=0 and y<=bottom and y+self.v+self.g >=bottom:
+                self.rect.bottom = bottom
+            # if ground[0] <=self.rect.centerx <=ground[1] and self.v>=0 and  self.rect.bottom<=ground[2] and self.rect.bottom+self.v+self.g>=ground[2]:
+                # self.rect.bottom=ground[2] 
                 self.stand()
                 return
         self.g=self.gravity
     
     def status_renew(self):
-        self.rect.center = (random.randint(200,800),-100)   #随机的重生位置
+        self.rect.center = random_pos()  #随机的重生位置
         self.v,self.vx = 0, 0
 
     def check_died(self):
-        if (self.rect.top>=SCREEN_WIDTH  or self.blood_slot.length <=0) and not self.is_died:
+        if (self.rect.top>= die_height  or self.blood_slot.length <=0) and not self.is_died:
             self.die_time = pygame.time.get_ticks()
             self.is_died = True
-            self.rect.y=1000
+            self.rect.y= die_wait_height
         if self.is_died:
             self.die()
             
@@ -164,7 +178,6 @@ class Role:
     def update(self):
         self.time = pygame.time.get_ticks()
         self.press = pygame.key.get_pressed()
-
         self.check_stand()
         self.check_move()
         self.check_jump()
@@ -172,7 +185,6 @@ class Role:
         self.check_repelled()
         self.check_died()
         self.status_update()
-
         draw(self.role,self.rect.topleft)
         self.weapon_update()  
         self.blood_slot.update()
@@ -183,3 +195,4 @@ class Role:
         self.weapon.time = self.time
         self.weapon.is_press = self.press[self.kr.shoot]
         self.weapon.update()
+        draw(self.weapon.img,self.weapon.draw_pos)

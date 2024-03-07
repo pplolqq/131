@@ -1,0 +1,22 @@
+SCREEN_LENGTH = 1000
+SCREEN_WIDTH = 600
+BACK_LENGTH = 2000
+BACK_WIDTH = 1200
+
+
+
+GRAVITY = 1
+PLAYER_MOVE_SPEED = 10
+JUMP_SPEED = 12
+
+BULLET_SPEED = 30
+
+
+ROLE_LENGTH = 50
+ROLE_WIDTH = 50
+orange = (255,125,40)
+green = (180,230,30)
+white = (255,255,255)
+black = (0,0,0)
+red =  (255,0,0)
+little_blue = (0,200,255)
