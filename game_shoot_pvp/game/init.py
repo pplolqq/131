@@ -19,17 +19,19 @@ pic = pygame.image.load
 draw = screen.blit
 get_time = pygame.time.get_ticks
 
-background = pic(r"game_shoot_pvp\pic\back2.png")
-map1 = pic(r"game_shoot_pvp\pic\map1.png")
-map1_pos = (150,150 )
+background = pic(r"game_shoot_pvp\pic\back1.png")
+cloud_init = pic(r"game_shoot_pvp\pic\cloud.png")
 bullets = []
+ground_maps = []
+clouds_map = []
+test_boxes = []
+ground_maps.append(clouds_map)
+ground_maps.append(test_boxes)
 player_total = 2
+# ground_poses1=[[165, 345, 200], [440, 580, 180], [680, 850, 175], [265, 740, 250], [165, 326, 350], [370, 600, 350], [680, 870, 330],[780,885,235]]
+ground_poses = [[105, 335, 210], [10, 240, 270], [160, 450, 335], [705, 935, 210], [800, 1030, 270], [590, 880, 335], [310, 730, 270]]
 
-ground_poses1=[[165, 345, 200], [440, 580, 180], [680, 850, 175], [265, 740, 250], [165, 326, 350], [370, 600, 350], [680, 870, 330],[780,885,235]]
-ground_poses1 = [[105, 335, 210], [10, 240, 270], [160, 450, 335], [705, 935, 210], [800, 1030, 270], [590, 880, 335], [310, 730, 270]]
-ground_poses = []
 
-    
 def slope_calculate(p1: tuple[int,int],p2: tuple[int,int]):
     dx = p2[0] - p1[0]
     dy = p2[1] - p1[1]

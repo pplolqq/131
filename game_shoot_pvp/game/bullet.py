@@ -29,52 +29,51 @@ class Bullet:
 
 
 bullet_img = pic(r"game_shoot_pvp/pic/bullet.png")
-
+pic_sniper = pic(r"game_shoot_pvp/pic/bullet_sniper.png")
+bullet_img = pic_sniper
 class Bullet_common(Bullet):
     def __init__(self, dir, pos, num) -> None:
         super().__init__(dir, pos, num)
         self.img = bullet_img
         self.rect =self.img.get_rect()
         self.rect.center = pos
-        self.rect.centery +=10
-        self.impact_force = 10
-        self.damage =5
+
+        self.rect.centery += 10
+        self.impact_force = 15
+        self.damage = 10
         self.speed = BULLET_SPEED
+        
         self.v = self.speed * dir
+        self.rect.x += dir*(self.rect.width)
     def is_out(self):
         return self.rect.centerx<=0 or self.rect.centerx>=SCREEN_LENGTH
 
     def move(self):
         self.rect.x+=self.v
         self.pos = self.rect.center
-        background.blit(self.img,self.rect.topleft)
 
     def is_pounding(self, rect : pygame.Rect):
-        left , right = rect.left,rect.right
-        top , bottom = rect.top,rect.bottom
-        x , y = self.rect.center
-        x_e = self.v + x 
-        if ((x_e >=right and x <left) or (x_e >=left and x<right)) and top <= y <= bottom:
-            return True
-
-        if left <= x <= right and top <= y <= bottom:
-            return True
-        return False
+        return rect.colliderect(self.rect)
     def pound(self) -> tuple[int, int]:
         return (self.dir*self.impact_force,0)
     def update(self):
         self.move()
         if self.is_out():
             self.disposal()
+        
         draw(self.img,self.rect.topleft)
-
+pic_sniper = pic(r"game_shoot_pvp/pic/bullet_sniper.png")
+pic_sniper = pygame.transform.scale(pic_sniper,(200,4))
 class Bullet_sniper(Bullet_common):
     def __init__(self, dir, pos, num) -> None:
         super().__init__(dir, pos, num)
         self.impact_force = 20
         self.damage = 50
-        self.v *= 2
-
+        self.img = pic_sniper
+        self.rect = self.img.get_rect()
+        self.rect.center = pos
+        self.rect.x += self.rect.width//2 * self.dir
+        # self.rect.x += 100*dir
 
 
 class Stove_ball(Bullet):
@@ -84,7 +83,7 @@ class Stove_ball(Bullet):
         self.idx = 0
         self.damage = 10
         self.stove_lines_posx = [(pos[0]+dir*25+40 * x * dir) for x in range(1,4)]
-        self.posy = self.pos[1] + 20
+        self.posy = self.pos[1] + 50
         self.line_length = 50
         self.up_force = 10
     def is_pounding(self, rect: pygame.Rect):
@@ -112,8 +111,6 @@ class Stove_ball(Bullet):
         self.idx += 1
         if self.idx == 18 :
             self.disposal()
-        
-
 
 
 pi = 3.1415926

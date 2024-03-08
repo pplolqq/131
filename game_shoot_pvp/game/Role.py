@@ -1,13 +1,14 @@
 from init import *
-from weapon import Weapon,weapon_select
+from weapon import Weapon
 from bullet import Bullet
 from blood_slot import Blood_slot
+from cloud import *
 random_revive_left = 200 
 random_revive_right = 800
 pos_y = -100 
 
-die_height = 1000 
-die_wait_height = SCREEN_WIDTH 
+die_height = SCREEN_WIDTH
+die_wait_height = SCREEN_WIDTH + 1000
 def random_pos():
     return (random.randint(random_revive_left,random_revive_right),pos_y)
 
@@ -21,7 +22,7 @@ class Kr:
         self.shoot = shoot
 
 class Role:
-    def __init__(self,img,kr:Kr,num) -> None:
+    def __init__(self,img,kr:Kr,weapon,num) -> None:
         
         self.num = num
         self.kr=kr
@@ -33,7 +34,7 @@ class Role:
         self.blood_slot : Blood_slot = Blood_slot(color_selected[num],(1000//(2*player_total+1)*(2*num+1),400))
         
         
-        self.weapon:Weapon = weapon_select[self.num]
+        self.weapon:Weapon = weapon
         self.weapon.num = num
 
         self.v = 0
@@ -108,16 +109,17 @@ class Role:
         self.v=0
 
     def check_stand(self):
-        for ground in ground_poses:
-            ground:pygame.Rect
-            left,right,bottom = ground.left,ground.right,ground.bottom
-            x,y = self.rect.centerx,self.rect.bottom
-            if left <= x <= right and self.v >=0 and y<=bottom and y+self.v+self.g >=bottom:
-                self.rect.bottom = bottom
-            # if ground[0] <=self.rect.centerx <=ground[1] and self.v>=0 and  self.rect.bottom<=ground[2] and self.rect.bottom+self.v+self.g>=ground[2]:
-                # self.rect.bottom=ground[2] 
-                self.stand()
-                return
+        for ground_map in ground_maps:
+            for ground in ground_map:
+                ground:Map_ground
+                rect = ground.rect
+                left,right,bottom = rect.left,rect.right,rect.bottom
+                x,y = self.rect.centerx,self.rect.bottom
+                y_e = y+self.v+self.g 
+                if left <= x <= right and y<=bottom and self.v>=0 and y_e >=bottom:
+                    self.rect.bottom = bottom
+                    self.stand()
+                    return
         self.g=self.gravity
     
     def status_renew(self):
